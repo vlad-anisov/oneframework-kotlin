@@ -18,14 +18,17 @@ class SaveAction : Action("check", "default") {
 fun Save(): Action = SaveAction()
 
 class DeleteAction(
-    private val confirm: Boolean,
+    private val confirm: Any,
     private val swipe: Boolean,
     private val model: Model?,
     private val domain: Any?,
 ) : Action("delete", "destructive") {
     override fun document() = mapOf(
         "type" to "delete",
-        "confirm" to confirm,
+        // Строка -- вопрос, который задают; `true` -- «спросить словами
+        // каркаса»; `false` -- не спрашивать. Шаблон -- вопрос, называющий
+        // запись, и строкой он становится к мигу, когда его задают.
+        "confirm" to if (confirm is Boolean) confirm else textJson(confirm),
         "swipe" to swipe,
         "model" to model?.name,
         "record_id" to null,
@@ -34,7 +37,7 @@ class DeleteAction(
 }
 
 fun Delete(
-    confirm: Boolean = true,
+    confirm: Any = true,
     swipe: Boolean = false,
     model: Model? = null,
     domain: Any? = null,

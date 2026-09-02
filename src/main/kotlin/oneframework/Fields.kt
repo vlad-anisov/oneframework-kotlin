@@ -32,6 +32,9 @@ open class Field(
         internal set
     var system: Boolean = false
         internal set
+    /** Модель, на которую ссылается связь. Узлу нужна она сама, а не имя. */
+    var comodel: Model? = null
+        internal set
 
     val props: MutableMap<String, Any?> = LinkedHashMap(Types.defaults(ftype)).apply { putAll(props) }
     val widgets: List<String> = Types.widgets(ftype)
@@ -93,8 +96,23 @@ open class Field(
  * встаёт в модель на своё место.
  */
 class FieldBuilder(private val field: Field) {
+    private var explicit: String? = null
+
+    /**
+     * Назвать колонку иначе, чем свойство.
+     *
+     * Нужно ровно там, где имя свойства занято: у `Model` есть своё `name`, а
+     * `name` -- самая частая колонка вообще и та единственная, которую
+     * `display_field` ищет первой. Без этого приложение на Kotlin не смогло бы
+     * объявить её вовсе, а модель без подписи рисуется ключом.
+     */
+    fun named(column: String): FieldBuilder {
+        explicit = column
+        return this
+    }
+
     operator fun provideDelegate(owner: Model, property: KProperty<*>): ReadOnlyProperty<Model, Field> {
-        field.name = property.name
+        field.name = explicit ?: property.name
         field.owner = owner
         owner.declare(field)
         return ReadOnlyProperty { _, _ -> field }
@@ -102,7 +120,7 @@ class FieldBuilder(private val field: Field) {
 
     /** Состояние экрана объявляется тем же делегатом, но на виде. */
     operator fun provideDelegate(owner: View, property: KProperty<*>): ReadOnlyProperty<View, Field> {
-        field.name = property.name
+        field.name = explicit ?: property.name
         field.owner = owner
         owner.declareState(field)
         return ReadOnlyProperty { _, _ -> field }
@@ -150,11 +168,42 @@ fun text(
 fun boolean(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
     build(Field("boolean", label, required, help, widget))
 
-fun integer(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
-    build(Field("integer", label, required, help, widget))
+/** `maximum` ограничивает оценку или счёт. Печатается всегда -- см. `props`. */
+fun integer(
+    label: String? = null,
+    maximum: Int? = null,
+    required: Boolean = false,
+    help: String? = null,
+    widget: String? = null,
+) = build(Field("integer", label, required, help, widget, mapOf("maximum" to maximum)))
 
-fun float(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
-    build(Field("float", label, required, help, widget))
+/** `unit` -- подпись единицы рядом со значением, `digits` -- всего и после точки. */
+fun float(
+    label: String? = null,
+    digits: List<Int>? = null,
+    unit: String? = null,
+    required: Boolean = false,
+    help: String? = null,
+    widget: String? = null,
+) = build(Field("float", label, required, help, widget,
+    if (digits == null) mapOf("unit" to unit) else mapOf("digits" to digits, "unit" to unit)))
+
+/** Деньги: те же цифры, что у дробного, плюс валюта. */
+fun monetary(
+    label: String? = null,
+    currency: String? = null,
+    digits: List<Int>? = null,
+    unit: String? = null,
+    required: Boolean = false,
+    help: String? = null,
+    widget: String? = null,
+): FieldBuilder {
+    val props = LinkedHashMap<String, Any?>()
+    if (currency != null) props["currency"] = currency
+    if (digits != null) props["digits"] = digits
+    props["unit"] = unit
+    return build(Field("monetary", label, required, help, widget, props))
+}
 
 fun color(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
     build(Field("color", label, required, help, widget))
@@ -171,8 +220,16 @@ fun time(label: String? = null, required: Boolean = false, help: String? = null,
 fun json(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
     build(Field("json", label, required, help, widget))
 
+/**
+ * Варианты выбора парами «значение, подпись».
+ *
+ * Форм в документе две, и это не небрежность. В **модели** они лежат парами --
+ * так их пишут, и так они короче в базе. В **узле вида** едут словарями:
+ * рендерер читает вариант по именам ключей, а не по месту, и перепутать
+ * значение с подписью там нельзя. Питон различает их так же.
+ */
 fun selection(
-    choices: List<String>,
+    choices: List<Pair<String, String>>,
     label: String? = null,
     required: Boolean = false,
     widget: String? = null,
@@ -180,17 +237,26 @@ fun selection(
     if (choices.isEmpty()) {
         throw OneFrameworkError("selection(...) без вариантов не описывает ничего.")
     }
-    return build(Field("selection", label, required, null, widget, mapOf("selection" to choices)))
+    val pairs = choices.map { listOf(it.first, it.second) }
+    return build(Field("selection", label, required, null, widget, mapOf("selection" to pairs)))
 }
 
+/**
+ * Связь. `unique` -- связь один-к-одному: то же самое, чему нельзя
+ * повториться. Ограничение, а не тип, и потому печатается всегда.
+ */
 fun many2one(
     comodel: Model,
     label: String? = null,
+    unique: Boolean = false,
     required: Boolean = false,
     widget: String? = null,
-): FieldBuilder = build(
-    Field("many2one", label, required, null, widget, mapOf("comodel" to comodel.name))
-)
+): FieldBuilder {
+    val field = Field("many2one", label, required, null, widget,
+        mapOf("comodel" to comodel.name, "unique" to unique))
+    field.comodel = comodel
+    return build(field)
+}
 
 fun one2many(
     comodel: Model,
