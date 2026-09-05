@@ -6,7 +6,7 @@ package oneframework
  * Едет исходником внутри библиотеки (`FieldTypes.kt`), а не ресурсом: ресурс
  * читает только JVM, а эта библиотека собирается ещё и под WebAssembly.
  * Совпадение копии с `protocol/field-types.json` сторожит
- * `tests/test_protocol.py`.
+ * `tests/together/test_protocol.py`.
  */
 object Types {
 
