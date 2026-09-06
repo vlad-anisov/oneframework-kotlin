@@ -1,12 +1,6 @@
 package oneframework
 
-/**
- * Действия -- то, что стоит за кнопкой.
- *
- * Форма записи в документе закреплена в `protocol/document.json` и совпадает с
- * питоновской. Кнопка о действии не знает ничего, кроме того, что оно есть:
- * `Note.summary` не говорит, на чём написана логика и чем её исполнят.
- */
+/** Действия -- то, что стоит за кнопкой. */
 abstract class Action(val defaultIcon: String?, val defaultStyle: String) {
     abstract fun document(): Map<String, Any?>
 }
@@ -26,8 +20,7 @@ class DeleteAction(
     override fun document() = mapOf(
         "type" to "delete",
         // Строка -- вопрос, который задают; `true` -- «спросить словами
-        // каркаса»; `false` -- не спрашивать. Шаблон -- вопрос, называющий
-        // запись, и строкой он становится к мигу, когда его задают.
+        // каркаса»; `false` -- не спрашивать.
         "confirm" to if (confirm is Boolean) confirm else textJson(confirm),
         "swipe" to swipe,
         "model" to model?.name,
@@ -92,13 +85,7 @@ class LogicAction(
     )
 }
 
-/**
- * Позвать логику модели.
- *
- * Обычно не нужна: `Note.summary` сам себе действие, и `button(action = ...)`
- * принимает его прямо. Обёртка остаётся для случая, когда действию передают
- * доводы или оно закрывает экран.
- */
+/** Позвать логику модели. */
 fun Logic(
     action: DeviceAction,
     args: Map<String, Any?> = emptyMap(),

@@ -1,13 +1,6 @@
 package oneframework
 
-/**
- * Таблица типов полей -- та же, что у питона и у JavaScript.
- *
- * Едет исходником внутри библиотеки (`FieldTypes.kt`), а не ресурсом: ресурс
- * читает только JVM, а эта библиотека собирается ещё и под WebAssembly.
- * Совпадение копии с `protocol/field-types.json` сторожит
- * `tests/together/test_protocol.py`.
- */
+/** Таблица типов полей -- та же, что у питона и у JavaScript. */
 object Types {
 
     private val table: Map<String, Any?> = load()

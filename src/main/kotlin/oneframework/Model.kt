@@ -1,19 +1,6 @@
 package oneframework
 
-/**
- * Модель: имя, подпись, поля, логика.
- *
- *     object Note : Model("Note", label = "Заметка") {
- *         val title by string("Текст", required = true)
- *         val details by text("Подробности")
- *         val summary by onDevice("logic/Summary.kt", writes = listOf(details))
- *     }
- *
- * `object`, а не класс: модель существует в одном экземпляре, как и в питоне,
- * где ею работает сам класс. Порядок свойств -- порядок объявления, и он же
- * порядок в документе; Kotlin выполняет инициализаторы сверху вниз, поэтому
- * разойтись им негде.
- */
+/** Модель: имя, подпись, поля, логика. */
 abstract class Model(
     val name: String,
     label: String? = null,
@@ -37,23 +24,12 @@ abstract class Model(
         declared[field.name] = field
     }
 
-    /**
-     * Объявить действие по имени метода.
-     *
-     * Зовётся не приложением, а тем, кто печатает объявление: имена методов
-     * он находит отражением. Приложение о существовании этого метода не
-     * знает и знать не должно -- в нём просто написаны методы.
-     */
+    /** Объявить действие по имени метода. */
     fun declareAction(entry: String, writes: List<Field>? = null, label: String? = null) {
         logic.add(DeviceAction(entry, this, writes, label))
     }
 
-    /**
-     * `Note.create(open = Card)` -- завести запись.
-     *
-     * Метод модели, а не отдельное действие: заводит записи модель, у
-     * отдельной записи для этого нет ни имени, ни места.
-     */
+    /** `Note.create(open = Card)` -- завести запись. */
     fun create(
         open: View? = null,
         values: Map<String, Any?> = emptyMap(),
@@ -61,13 +37,7 @@ abstract class Model(
         target: String = "page",
     ): Action = CreateAction(this, open, values, draft, target)
 
-    /**
-     * `Note.search(domain)` -- набор записей по условию.
-     *
-     * Возвращает не записи, а объявление набора: приложение объявляют, а не
-     * исполняют. У набора есть то же, что у записи, -- `delete()`. Так
-     * «удалить всё выполненное» пишется тем же методом, что «удалить эту».
-     */
+    /** `Note.search(domain)` -- набор записей по условию. */
     fun search(domain: Any? = null): RecordSet = RecordSet(this, domain)
 
     /** Действие модели по имени -- чтобы кнопка могла на него сослаться. */
@@ -89,12 +59,7 @@ abstract class Model(
             "у модели $name нет поля «$fieldName»." + didYouMean(fieldName, declared.keys)
         )
 
-    /**
-     * Документ модели -- ровно то, что печатает `model_schema` питона.
-     *
-     * Сперва объявленные поля, потом даровые: тот же порядок, что у питона, и
-     * он входит в отпечаток.
-     */
+    /** Документ модели -- ровно то, что печатает `model_schema` питона. */
     fun document(): Map<String, Any?> {
         val out = ArrayList<Map<String, Any?>>()
         for (field in declared.values) out.add(field.document())
@@ -118,17 +83,12 @@ abstract class Model(
     }
 }
 
-/**
- * Набор записей, названный условием. Пока -- объявление, не данные.
- *
- * Существует ради одного: чтобы удаление множества писалось тем же словом,
- * что удаление одной записи.
- */
+/** Набор записей, названный условием. */
 class RecordSet(private val model: Model, private val domain: Any?) {
     fun delete(confirm: Boolean = true, swipe: Boolean = false): Action =
         DeleteAction(confirm, swipe, model, domain)
 }
 
-/** `TodoLine` -> `todo_line`. Правило одно на все языки. */
+/** `TodoLine` -> `todo_line`. */
 fun tableName(name: String): String =
     Regex("(?<!^)([A-Z])").replace(name) { "_${it.groupValues[1]}" }.lowercase()

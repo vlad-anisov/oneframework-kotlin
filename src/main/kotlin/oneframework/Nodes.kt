@@ -1,19 +1,8 @@
 package oneframework
 
-/**
- * Узлы вида: строка, поле, кнопка, список, и действия за ними.
- *
- * Документ, который здесь печатается, совпадает с питоновским до последнего
- * ключа и до опознавательного номера узла (`Card.f1`, `Card.b2`). Совпадение
- * не украшение: по документу считается отпечаток, а по отпечатку обмен решает,
- * одно это приложение или два разных.
- *
- * Умеет столько, сколько нужно, чтобы объявить приложение целиком на Kotlin, и
- * ни узлом больше. Чего нет -- отказывает вслух: похожее хуже пустого места,
- * потому что не вызывает вопросов.
- */
+/** Узлы вида: строка, поле, кнопка, список, и действия за ними. */
 
-/** Буква в номере узла. Та же таблица, что `_PREFIX` в питоне. */
+/** Буква в номере узла. */
 private val PREFIX = mapOf(
     "view" to "v", "row" to "r", "col" to "c", "group" to "g", "section" to "sec",
     "repeat" to "rep", "tabs" to "tb", "tab" to "tab", "field" to "f", "list" to "l",
@@ -28,11 +17,7 @@ abstract class Node(val nodeType: String) {
 
     abstract fun document(): Map<String, Any?>
 
-    /**
-     * Все узлы поддерева. Открыт для замены: у вкладки заголовок и плавающая
-     * кнопка висят на ней, а не стоят среди детей, -- и номера им нужны, как
-     * всякому другому узлу.
-     */
+    /** Все узлы поддерева. */
     open fun walk(): List<Node> = listOf(this) + children.flatMap { it.walk() }
 }
 
@@ -61,8 +46,7 @@ class FieldNode(
 
     override fun document(): Map<String, Any?> {
         val out = LinkedHashMap<String, Any?>(options)
-        // То, что нужно рендереру и что знает о себе само поле. Список тот же,
-        // что в питоне: перечислить его здесь заново -- значит однажды отстать.
+        // То, что нужно рендереру и что знает о себе само поле.
         for (key in listOf(
             "currency", "digits", "maximum", "accept", "max_size", "inverse",
             "unit", "semantic", "lines", "unique", "create",
@@ -84,14 +68,14 @@ class FieldNode(
         доc["placeholder"] = placeholder
         доc["options"] = out
         // Варианты выбора едут словарями: рендерер читает их по именам ключей,
-        // а не по месту. В модели те же варианты лежат парами -- короче.
+        // а не по месту.
         if (field.ftype == "selection") {
             @Suppress("UNCHECKED_CAST")
             val pairs = field.props["selection"] as? List<List<String>> ?: emptyList()
             доc["choices"] = pairs.map { mapOf("value" to it[0], "label" to it[1]) }
         }
         // Рядом со связью -- то, чем её рисуют: подпись модели, поле показа и
-        // поле цвета. Без них рендерер знает только ключ и показал бы его.
+        // поле цвета.
         field.comodel?.let { со ->
             val показ = со.fields.firstOrNull { it.name == "name" }
                 ?: со.fields.firstOrNull { it.ftype == "string" && !it.system }
@@ -155,14 +139,7 @@ fun button(
     visible: Any = true,
 ): Node = ButtonNode(label, icon, action, style, place, enabled, visible)
 
-/**
- * Кнопка, за которой стоит логика модели: `button(action = Note.summary)`.
- *
- * Обёртки `Logic(...)` не нужно -- при ссылке она ничего не добавляла, а
- * лишнее слово между кнопкой и тем, что она делает, читается как обряд.
- * Отдельная перегрузка, а не общий тип: Kotlin типизирован, и пусть
- * компилятор видит, что именно кнопке дали.
- */
+/** Кнопка, за которой стоит логика модели: `button(action = Note.summary)`. */
 fun button(
     label: String? = null,
     icon: String? = null,
@@ -243,10 +220,7 @@ fun list(
     rowHeight, menu, search, handleField, handleHidden, swipeLabel, swipeDelete,
 )
 
-/**
- * Раздать узлам номера. Обход тот же, что у питона: сам вид, затем дети
- * вглубь, счётчик на каждую букву свой.
- */
+/** Раздать узлам номера. */
 internal fun assignIds(nodes: List<Node>, viewName: String) {
     val counters = HashMap<String, Int>()
     fun visit(node: Node) {
@@ -270,16 +244,14 @@ internal fun assignIds(nodes: List<Node>, viewName: String) {
         node.walk().drop(1).forEach { visit(it) }
     }
     // Сам вид -- первый узел обхода, и он тоже забирает номер, хотя в
-    // документе его не печатают. Не забрать значило бы сдвинуть все остальные.
+    // документе его не печатают.
     counters["v"] = 1
     nodes.forEach { обойти(it) }
 }
 
-// ---------------------------------------------------------------------------
-// Раскладка: колонка, группа, заголовок, складной блок
-// ---------------------------------------------------------------------------
+// --- Раскладка: колонка, группа, заголовок, складной блок -------------------
 
-/** Вертикальная стопка. Направление формы по умолчанию, сказанное вслух. */
+/** Вертикальная стопка. */
 class ColNode(override val children: List<Node>, private val span: Int?) : Node("col") {
     override fun document() = mapOf(
         "type" to "col", "id" to id, "span" to span,
@@ -311,12 +283,7 @@ class GroupNode(
     )
 }
 
-/**
- * Подложка группы. `card` -- поверхность, положенная **на** страницу: с
- * отступом от краёв и скруглением, то есть то, чем раздел формы выглядит на
- * обеих платформах. `sheet` говорит, что группа не на странице, а **есть**
- * она: поверхность идёт от края до края и донизу.
- */
+/** Подложка группы. */
 fun group(
     vararg children: Node,
     label: String? = null,
@@ -332,13 +299,7 @@ class SectionNode(private val title: String?, private val subtitle: String?) : N
 
 fun section(title: String?, subtitle: String? = null): Node = SectionNode(title, subtitle)
 
-/**
- * Озаглавленный блок, который складывается.
- *
- * `visible` -- единственное условие, которое берёт **раздел**, и отвечается оно
- * при развороте документа, а не на запись: блоку, за которым ничего нет, не
- * место на экране вовсе, и это вопрос к данным за блоком, а не к строке внутри.
- */
+/** Озаглавленный блок, который складывается. */
 class AccordionNode(
     override val children: List<Node>,
     private val label: String?,
@@ -365,9 +326,7 @@ fun accordion(
     visible: Any = true,
 ): Node = AccordionNode(children.toList(), label, open, visible)
 
-// ---------------------------------------------------------------------------
-// Подписи: текст, значок, счётчик
-// ---------------------------------------------------------------------------
+// --- Подписи: текст, значок, счётчик ----------------------------------------
 
 /** Кусок текста там, где стоял бы кусок текста. */
 class TextNode(internal val value: Any?) : Node("text") {
@@ -376,24 +335,14 @@ class TextNode(internal val value: Any?) : Node("text") {
 
 fun text(value: Any?): Node = TextNode(value)
 
-/**
- * Знак там, где стоял бы кусок текста -- `tab(icon("star"), ...)`.
- *
- * `name` -- лигатура Material Icons, тот же словарь, которым пользуется
- * `button(icon = ...)`: набор значков в сборке один.
- */
+/** Знак там, где стоял бы кусок текста -- `tab(icon("star"), ...)`. */
 class IconNode(private val glyph: String) : Node("icon") {
     override fun document() = mapOf("type" to "icon", "id" to id, "name" to glyph)
 }
 
 fun icon(name: String): Node = IconNode(name)
 
-/**
- * Счётчик рядом с подписью.
- *
- * Не значок Material: тот -- тревога, рисуется цветом ошибки и висит над углом.
- * Этот -- часть строки, в которой стоит, и место в ней занимает.
- */
+/** Счётчик рядом с подписью. */
 class PillNode(private val value: Any?, private val whenShown: String) : Node("pill") {
 
     init {
@@ -418,20 +367,12 @@ class PillNode(private val value: Any?, private val whenShown: String) : Node("p
 
 fun pill(value: Any?, shown: String = "always"): Node = PillNode(value, shown)
 
-// ---------------------------------------------------------------------------
-// Вкладки и повторитель
-// ---------------------------------------------------------------------------
+// --- Вкладки и повторитель --------------------------------------------------
 
 /** Из чего складывается заголовок вкладки -- в отличие от её содержимого. */
 private val TITLE_PARTS = setOf("text", "icon", "pill")
 
-/**
- * Одна страница вкладок.
- *
- * Заголовок -- те части, что ей передали; голая строка -- сокращение для
- * одного текста. Ни текст, ни значок, ни счётчик содержимым не бывают, поэтому
- * помечать, который довод чем является, не нужно.
- */
+/** Одна страница вкладок. */
 class TabNode(labelNode: Node, parts: List<Node>) : Node("tab") {
     private val title = ArrayList<Node>()
     private var fab: Node? = null
@@ -450,7 +391,7 @@ class TabNode(labelNode: Node, parts: List<Node>) : Node("tab") {
         }
     }
 
-    /** Простое имя вкладки -- первый текст заголовка. У названной знаком его нет. */
+    /** Простое имя вкладки -- первый текст заголовка. */
     private fun plainLabel(): Any? =
         (title.firstOrNull { it is TextNode } as TextNode?)?.value ?: ""
 
@@ -498,24 +439,10 @@ class TabsNode(override val children: List<Node>, private val page: Any) : Node(
     )
 }
 
-/**
- * Являются ли вкладки самим экраном. `"auto"` -- являются, когда, кроме них,
- * на экране ничего нет; `true` -- всегда; `false` -- никогда.
- */
+/** Являются ли вкладки самим экраном. */
 fun tabs(vararg children: Node, page: Any = "auto"): Node = TabsNode(children.toList(), page)
 
-/**
- * Одно тело, нарисованное по разу на каждую запись модели.
- *
- * Это то, чем становится цикл по записям. Разница не в слоге, а в сроке жизни:
- * список, собранный на месте, запекает те записи, что были при сборке дерева, и
- * заведённый позже вкладки уже не получит. Повторитель остаётся **вопросом** к
- * данным, и тот же документ рисует то, что в них есть.
- *
- * Внутри тела текущая запись -- `item(Полка.name)`; поле модели по-прежнему
- * значит «строка, о которой идёт речь здесь», и это другая запись: список
- * внутри повторителя отбирает `Книга.shelf eq item.id`.
- */
+/** Одно тело, нарисованное по разу на каждую запись модели. */
 class RepeatNode(
     private val model: Model,
     override val children: List<Node>,
@@ -535,14 +462,7 @@ class RepeatNode(
     }
 }
 
-/**
- * Запись повторителя, привязанная к его модели.
- *
- * Доводом, а не глобальной подстановкой: поле спрашивается настоящим свойством
- * модели (`item(Полка.name)`), и опечатку ловит компилятор, а не рантайм. Это
- * то же решение, что и `Полка.name` вместо `record.name` -- на статически
- * типизированном языке проверять имена строкой было бы шагом назад.
- */
+/** Запись повторителя, привязанная к его модели. */
 class Item internal constructor(private val model: Model) {
     operator fun invoke(field: Field): Expr {
         if (field.owner !== model) {
@@ -554,7 +474,7 @@ class Item internal constructor(private val model: Model) {
         return ItemRef(field.name)
     }
 
-    /** Ключ записи. Поля с таким именем не объявляют -- он есть у всякой. */
+    /** Ключ записи. */
     val id: Expr get() = ItemRef("id")
 }
 
@@ -565,16 +485,9 @@ fun repeat(
     body: (Item) -> List<Node>,
 ): Node = RepeatNode(model, body(Item(model)), domain, order)
 
-// ---------------------------------------------------------------------------
-// Меню, поиск, отбор, порядок
-// ---------------------------------------------------------------------------
+// --- Меню, поиск, отбор, порядок --------------------------------------------
 
-/**
- * Меню за тремя точками.
- *
- * Отданное списку, оно принадлежит списку и стоит в его шапке. Поставленное в
- * вид с `place = "navbar"` -- принадлежит записи и стоит в верхнем баре.
- */
+/** Меню за тремя точками. */
 class MenuNode(
     override val children: List<Node>,
     private val place: String?,
@@ -686,12 +599,7 @@ class SearchNode(
     override fun document() = document(null)
 }
 
-/**
- * Поля, отборы и порядки вперемешку -- разбираются по тому, чем они являются.
- *
- * Порядок внутри каждого рода сохраняется: по нему считается «тот, что по
- * умолчанию», и переставленный отбор поменял бы поведение молча.
- */
+/** Поля, отборы и порядки вперемешку -- разбираются по тому, чем они являются. */
 fun search(vararg parts: Any, icon: String = "swap_vert"): SearchNode {
     val fields = ArrayList<Field>()
     val filters = ArrayList<FilterNode>()

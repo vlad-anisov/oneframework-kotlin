@@ -1,15 +1,8 @@
 package oneframework
 
-/**
- * Приложение и пакет объявления.
- *
- * `app(...)` собирает то же, что питоновский `App`, а `emit(...)` печатает
- * **пакет объявления** -- обычный JSON, который читает сборка. Пакет и есть
- * граница: за ней сборке безразлично, чем приложение объявлено, и ровно
- * поэтому его можно объявить на Kotlin.
- */
+/** Приложение и пакет объявления. */
 
-/** Версия договора пакета. Та же, что в `oneframework/declaration.py`. */
+/** Версия договора пакета. */
 const val VERSION = 1
 
 class Screen(val view: View, val label: String? = null, val icon: String? = null)
@@ -18,20 +11,13 @@ class App(
     val screens: List<Screen>,
     val models: List<Model>,
     val views: List<View>,
-    /**
-     * Зависимости с Maven Central -- «группа:артефакт:версия».
-     *
-     * Едут не на устройство, а в сборку: TeaVM кладёт в модуль только тот код,
-     * до которого дотянулась логика. Объявлять их приходится здесь, потому что
-     * компилятору они нужны дважды -- когда собирается байткод и когда из
-     * байткода делается модуль.
-     */
+    /** Зависимости с Maven Central -- «группа:артефакт:версия». */
     val dependencies: List<String> = emptyList(),
     title: String? = null,
     dbName: String? = null,
     val color: String = "#6750A4",
-    // Согласие брать цвет у системы там, где платформа его даёт: из веба
-    // его не достать, только родным кодом (docs/probe-system-color.md).
+    // Согласие брать цвет у системы там, где платформа его даёт: из веба его
+    // не достать, только родным кодом (docs/probe-system-color.md).
     val dynamicColor: Boolean = false,
     val locale: String? = null,
     val theme: String = "auto",
@@ -78,12 +64,7 @@ fun app(
     sync: Any? = null,
 ): App = App(screens, models, views, dependencies, title, dbName, color, dynamicColor, locale, theme, sync)
 
-/**
- * Приложение -> пакет объявления.
- *
- * Раздел `types` собирается из встреченных полей, а не перечисляется: так
- * новый тип поля попадает в пакет сам, как и в питоне.
- */
+/** Приложение -> пакет объявления. */
 fun declare(application: App): Map<String, Any?> {
     val types = LinkedHashMap<String, Any?>()
     for (model in application.models) model.typeDocument(types)
@@ -125,9 +106,7 @@ fun declare(application: App): Map<String, Any?> {
         "views" to application.views.map { it.document() },
         "logic" to logic,
         // Демо-данных эта библиотека не знает: `seed.py` -- приём питоновской
-        // привязки. Ключ всё равно печатается -- пустой список значит «их
-        // нет», отсутствие ключа значило бы потерянный раздел, и по пакету их
-        // не различить.
+        // привязки.
         "seeds" to emptyList<Map<String, Any?>>(),
     )
 }

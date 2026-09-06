@@ -1,36 +1,13 @@
 package oneframework
 
-/**
- * Вид: что нарисовать и из чего.
- *
- *     object Line : View("Line", model = Note) {
- *         override fun ui() = nodes(
- *             row(
- *                 Note.done(widget = "toggle"),
- *                 Note.title(widget = "title"),
- *                 button(icon = "delete", action = Delete()),
- *             )
- *         )
- *     }
- *
- * Поле пишется `Note.title()`, а не `record.title()`, и это не отступление, а
- * то, что даёт статическая типизация: `Note.title` -- настоящее свойство,
- * которое компилятор проверяет, по которому работает переход к определению и
- * переименование. Прокси, разбирающий имена в рантайме, был бы здесь шагом
- * назад -- в питоне и JavaScript он нужен потому, что иначе имя поля никак не
- * проверить до запуска.
- *
- * Документ при этом получается тот же самый, до отпечатка.
- */
+/** Вид: что нарисовать и из чего. */
 abstract class View(
     val name: String,
     val model: Model? = null,
     val title: String? = null,
     val dismiss: String = "auto",
     // Крошки: null -- решает правило (широкое окно, кадров больше одного),
-    // false -- здесь их нет никогда, true -- есть и на телефоне. Тип с
-    // вопросом, а не строка «auto»: у признака три состояния, и два из них --
-    // обычные «да» и «нет».
+    // false -- здесь их нет никогда, true -- есть и на телефоне.
     val crumbs: Boolean? = null,
 ) {
     private val state = LinkedHashMap<String, Field>()
@@ -45,10 +22,10 @@ abstract class View(
         state[field.name] = field
     }
 
-    /** Дерево вида. Возвращает узлы -- один или несколько. */
+    /** Дерево вида. */
     abstract fun ui(): List<Node>
 
-    /** Узлы списком. Сахар, чтобы `ui()` читался как перечисление. */
+    /** Узлы списком. */
     protected fun nodes(vararg items: Node): List<Node> = items.toList()
 
     /** Документ вида -- то же, что печатает `document()` питона. */

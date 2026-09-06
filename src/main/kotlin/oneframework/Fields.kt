@@ -3,18 +3,7 @@ package oneframework
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-/**
- * Поля модели.
- *
- * Объявляются делегатом -- `val title by string("Текст")`. Это не украшение:
- * имя поля обязано совпасть с именем свойства, иначе объявление говорит одно,
- * а колонка называется другим. Делегат берёт имя у самого свойства, и разойтись
- * им негде.
- *
- * Всё, что поле знает о своём типе, берётся из общей таблицы (`Types`), а не
- * пишется здесь: новый тип поля, добавленный в питон и попавший в таблицу,
- * появляется тут сам.
- */
+/** Поля модели. */
 open class Field(
     val ftype: String,
     val label: String? = null,
@@ -32,7 +21,7 @@ open class Field(
         internal set
     var system: Boolean = false
         internal set
-    /** Модель, на которую ссылается связь. Узлу нужна она сама, а не имя. */
+    /** Модель, на которую ссылается связь. */
     var comodel: Model? = null
         internal set
 
@@ -58,7 +47,7 @@ open class Field(
     val stored: Boolean
         get() = props["stored"] as Boolean? ?: Types.stored(ftype)
 
-    /** Поле -> документ. Слово в слово то, что печатает `field_schema` питона. */
+    /** Поле -> документ. */
     open fun document(): Map<String, Any?> {
         val out = LinkedHashMap<String, Any?>()
         out["name"] = name
@@ -89,23 +78,11 @@ open class Field(
     ): Node = FieldNode(this, widget, label, visible, place, placeholder, options)
 }
 
-/**
- * Поле, ещё не знающее своего имени.
- *
- * Живёт ровно до `by`: делегат отдаёт имя свойства, поле его забирает и
- * встаёт в модель на своё место.
- */
+/** Поле, ещё не знающее своего имени. */
 class FieldBuilder(private val field: Field) {
     private var explicit: String? = null
 
-    /**
-     * Назвать колонку иначе, чем свойство.
-     *
-     * Нужно ровно там, где имя свойства занято: у `Model` есть своё `name`, а
-     * `name` -- самая частая колонка вообще и та единственная, которую
-     * `display_field` ищет первой. Без этого приложение на Kotlin не смогло бы
-     * объявить её вовсе, а модель без подписи рисуется ключом.
-     */
+    /** Назвать колонку иначе, чем свойство. */
     fun named(column: String): FieldBuilder {
         explicit = column
         return this
@@ -168,7 +145,7 @@ fun text(
 fun boolean(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
     build(Field("boolean", label, required, help, widget))
 
-/** `maximum` ограничивает оценку или счёт. Печатается всегда -- см. `props`. */
+/** `maximum` ограничивает оценку или счёт. */
 fun integer(
     label: String? = null,
     maximum: Int? = null,
@@ -220,14 +197,7 @@ fun time(label: String? = null, required: Boolean = false, help: String? = null,
 fun json(label: String? = null, required: Boolean = false, help: String? = null, widget: String? = null) =
     build(Field("json", label, required, help, widget))
 
-/**
- * Варианты выбора парами «значение, подпись».
- *
- * Форм в документе две, и это не небрежность. В **модели** они лежат парами --
- * так их пишут, и так они короче в базе. В **узле вида** едут словарями:
- * рендерер читает вариант по именам ключей, а не по месту, и перепутать
- * значение с подписью там нельзя. Питон различает их так же.
- */
+/** Варианты выбора парами «значение, подпись». */
 fun selection(
     choices: List<Pair<String, String>>,
     label: String? = null,
@@ -241,10 +211,7 @@ fun selection(
     return build(Field("selection", label, required, null, widget, mapOf("selection" to pairs)))
 }
 
-/**
- * Связь. `unique` -- связь один-к-одному: то же самое, чему нельзя
- * повториться. Ограничение, а не тип, и потому печатается всегда.
- */
+/** Связь. */
 fun many2one(
     comodel: Model,
     label: String? = null,
