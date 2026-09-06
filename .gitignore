@@ -7,3 +7,9 @@ __pycache__/
 .pytest_cache/
 test-results/
 playwright-report/
+
+# Gradle: кэш и продукты сборки. Папка с точки, а не `build`: в дереве, откуда
+# снимается этот репозиторий, `build/` уже занято исходниками сборщика ядра.
+.gradle/
+.gradle-build/
+.kotlin/

@@ -1,0 +1,962 @@
+{
+ "oneframework": 1,
+ "app": {
+  "title": "Полки",
+  "db_name": "app.db",
+  "root": "Полки",
+  "screens": [
+   {
+    "key": "Полки",
+    "label": "Полки",
+    "icon": "shelves",
+    "view": "Полки",
+    "master_detail": true
+   }
+  ],
+  "color": "#6750A4",
+  "dynamic_color": false,
+  "locale": null,
+  "theme": "auto",
+  "sync": null,
+  "python_packages": [],
+  "maven": []
+ },
+ "types": {
+  "string": {
+   "sql": "TEXT",
+   "widget": "text",
+   "widgets": [
+    "text",
+    "textarea",
+    "title",
+    "subtitle",
+    "headline",
+    "rich",
+    "email",
+    "phone",
+    "url",
+    "password",
+    "barcode"
+   ],
+   "stored": true
+  },
+  "color": {
+   "sql": "TEXT",
+   "widget": "color",
+   "widgets": [
+    "color"
+   ],
+   "stored": true
+  },
+  "uuid": {
+   "sql": "TEXT",
+   "widget": "text",
+   "widgets": [
+    "text",
+    "title"
+   ],
+   "stored": true
+  },
+  "datetime": {
+   "sql": "TEXT",
+   "widget": "datetime",
+   "widgets": [
+    "datetime",
+    "text",
+    "title"
+   ],
+   "stored": true
+  },
+  "many2one": {
+   "sql": "TEXT",
+   "widget": "select",
+   "widgets": [
+    "select",
+    "tag",
+    "chips",
+    "autocomplete",
+    "inline"
+   ],
+   "stored": true
+  },
+  "boolean": {
+   "sql": "INTEGER",
+   "widget": "checkbox",
+   "widgets": [
+    "checkbox",
+    "toggle"
+   ],
+   "stored": true
+  },
+  "integer": {
+   "sql": "INTEGER",
+   "widget": "number",
+   "widgets": [
+    "number",
+    "handle",
+    "stepper",
+    "range"
+   ],
+   "stored": true
+  },
+  "float": {
+   "sql": "REAL",
+   "widget": "number",
+   "widgets": [
+    "number",
+    "unit",
+    "range",
+    "progress",
+    "gauge"
+   ],
+   "stored": true
+  },
+  "monetary": {
+   "sql": "INTEGER",
+   "widget": "monetary",
+   "widgets": [
+    "monetary",
+    "number"
+   ],
+   "stored": true
+  },
+  "selection": {
+   "sql": "TEXT",
+   "widget": "select",
+   "widgets": [
+    "select",
+    "radio",
+    "segmented",
+    "badge",
+    "chips",
+    "picker",
+    "pill"
+   ],
+   "stored": true
+  },
+  "date": {
+   "sql": "TEXT",
+   "widget": "calendar",
+   "widgets": [
+    "calendar",
+    "text",
+    "title"
+   ],
+   "stored": true
+  },
+  "time": {
+   "sql": "TEXT",
+   "widget": "time",
+   "widgets": [
+    "time",
+    "picker",
+    "text",
+    "title"
+   ],
+   "stored": true
+  }
+ },
+ "models": [
+  {
+   "name": "Полка",
+   "label": "Полка",
+   "table": "полка",
+   "fields": [
+    {
+     "name": "name",
+     "ftype": "string",
+     "label": "Название",
+     "required": true,
+     "lines": 1,
+     "semantic": "text"
+    },
+    {
+     "name": "color",
+     "ftype": "color",
+     "label": "Цвет"
+    },
+    {
+     "name": "id",
+     "ftype": "uuid",
+     "label": "ID",
+     "lines": 1,
+     "readonly": true,
+     "semantic": "text",
+     "system": true
+    },
+    {
+     "name": "hlc",
+     "ftype": "string",
+     "label": "Order stamp",
+     "lines": 1,
+     "readonly": true,
+     "semantic": "text",
+     "system": true
+    },
+    {
+     "name": "created_at",
+     "ftype": "datetime",
+     "label": "Created",
+     "readonly": true,
+     "system": true
+    },
+    {
+     "name": "updated_at",
+     "ftype": "datetime",
+     "label": "Updated",
+     "readonly": true,
+     "system": true
+    }
+   ]
+  },
+  {
+   "name": "Книга",
+   "label": "Книга",
+   "table": "книга",
+   "fields": [
+    {
+     "name": "title",
+     "ftype": "string",
+     "label": "Заглавие",
+     "required": true,
+     "lines": 1,
+     "semantic": "text"
+    },
+    {
+     "name": "notes",
+     "ftype": "string",
+     "label": "Заметки",
+     "widget": "textarea",
+     "lines": 4,
+     "semantic": "text"
+    },
+    {
+     "name": "shelf",
+     "ftype": "many2one",
+     "label": "Полка",
+     "comodel": "Полка",
+     "ondelete": "set null"
+    },
+    {
+     "name": "read",
+     "ftype": "boolean",
+     "label": "Прочитана"
+    },
+    {
+     "name": "sequence",
+     "ftype": "integer",
+     "label": "Порядок"
+    },
+    {
+     "name": "pages",
+     "ftype": "integer",
+     "label": "Страниц",
+     "maximum": 5000
+    },
+    {
+     "name": "weight",
+     "ftype": "float",
+     "label": "Вес",
+     "digits": [
+      6,
+      2
+     ]
+    },
+    {
+     "name": "price",
+     "ftype": "monetary",
+     "label": "Цена",
+     "currency": "BYN",
+     "digits": [
+      16,
+      2
+     ]
+    },
+    {
+     "name": "kind",
+     "ftype": "selection",
+     "label": "Род",
+     "selection": [
+      [
+       "proza",
+       "Проза"
+      ],
+      [
+       "stihi",
+       "Стихи"
+      ]
+     ]
+    },
+    {
+     "name": "bought",
+     "ftype": "date",
+     "label": "Куплена"
+    },
+    {
+     "name": "opened",
+     "ftype": "datetime",
+     "label": "Открыта"
+    },
+    {
+     "name": "alarm",
+     "ftype": "time",
+     "label": "Напоминание"
+    },
+    {
+     "name": "id",
+     "ftype": "uuid",
+     "label": "ID",
+     "lines": 1,
+     "readonly": true,
+     "semantic": "text",
+     "system": true
+    },
+    {
+     "name": "hlc",
+     "ftype": "string",
+     "label": "Order stamp",
+     "lines": 1,
+     "readonly": true,
+     "semantic": "text",
+     "system": true
+    },
+    {
+     "name": "created_at",
+     "ftype": "datetime",
+     "label": "Created",
+     "readonly": true,
+     "system": true
+    },
+    {
+     "name": "updated_at",
+     "ftype": "datetime",
+     "label": "Updated",
+     "readonly": true,
+     "system": true
+    }
+   ]
+  }
+ ],
+ "views": [
+  {
+   "type": "view",
+   "name": "Строка",
+   "model": "Книга",
+   "children": [
+    {
+     "type": "row",
+     "id": "Строка.r1",
+     "children": [
+      {
+       "type": "field",
+       "id": "Строка.f1",
+       "name": "sequence",
+       "scope": "record",
+       "ftype": "integer",
+       "widget": "handle",
+       "label": "Порядок",
+       "required": false,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {
+        "maximum": null
+       }
+      },
+      {
+       "type": "field",
+       "id": "Строка.f2",
+       "name": "read",
+       "scope": "record",
+       "ftype": "boolean",
+       "widget": "toggle",
+       "label": "Прочитана",
+       "required": false,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {}
+      },
+      {
+       "type": "field",
+       "id": "Строка.f3",
+       "name": "title",
+       "scope": "record",
+       "ftype": "string",
+       "widget": "title",
+       "label": "Заглавие",
+       "required": true,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {
+        "semantic": "text",
+        "lines": 1
+       }
+      },
+      {
+       "type": "field",
+       "id": "Строка.f4",
+       "name": "shelf",
+       "scope": "record",
+       "ftype": "many2one",
+       "widget": "tag",
+       "label": "Полка",
+       "required": false,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {
+        "unique": false
+       },
+       "comodel": {
+        "name": "Полка",
+        "label": "Полка",
+        "display_field": "name",
+        "color_field": "color"
+       }
+      },
+      {
+       "type": "button",
+       "id": "Строка.b1",
+       "label": null,
+       "visible": true,
+       "icon": "delete",
+       "style": "destructive",
+       "place": null,
+       "enabled": true,
+       "action": {
+        "type": "delete",
+        "confirm": true,
+        "swipe": false,
+        "model": null,
+        "record_id": null,
+        "domain": null
+       }
+      }
+     ]
+    }
+   ],
+   "title": "Строка",
+   "title_is_code": false,
+   "dismiss": "auto",
+   "crumbs": null,
+   "state": []
+  },
+  {
+   "type": "view",
+   "name": "Карточка",
+   "model": "Книга",
+   "children": [
+    {
+     "type": "section",
+     "id": "Карточка.sec1",
+     "title": "Про книгу",
+     "subtitle": "то, что видно с полки"
+    },
+    {
+     "type": "group",
+     "id": "Карточка.g1",
+     "label": "Главное",
+     "cols": 2,
+     "surface": "card",
+     "children": [
+      {
+       "type": "col",
+       "id": "Карточка.c1",
+       "span": 6,
+       "children": [
+        {
+         "type": "field",
+         "id": "Карточка.f1",
+         "name": "title",
+         "scope": "record",
+         "ftype": "string",
+         "widget": "text",
+         "label": "Заглавие",
+         "required": true,
+         "readonly": false,
+         "visible": true,
+         "place": null,
+         "placeholder": null,
+         "options": {
+          "semantic": "text",
+          "lines": 1
+         }
+        }
+       ]
+      },
+      {
+       "type": "col",
+       "id": "Карточка.c2",
+       "span": 6,
+       "children": [
+        {
+         "type": "field",
+         "id": "Карточка.f2",
+         "name": "kind",
+         "scope": "record",
+         "ftype": "selection",
+         "widget": "select",
+         "label": "Род",
+         "required": false,
+         "readonly": false,
+         "visible": true,
+         "place": null,
+         "placeholder": null,
+         "options": {},
+         "choices": [
+          {
+           "value": "proza",
+           "label": "Проза"
+          },
+          {
+           "value": "stihi",
+           "label": "Стихи"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "accordion",
+     "id": "Карточка.acc1",
+     "label": "Подробности",
+     "open": true,
+     "children": [
+      {
+       "type": "field",
+       "id": "Карточка.f3",
+       "name": "notes",
+       "scope": "record",
+       "ftype": "string",
+       "widget": "textarea",
+       "label": "Заметки",
+       "required": false,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {
+        "semantic": "text",
+        "lines": 4
+       }
+      },
+      {
+       "type": "field",
+       "id": "Карточка.f4",
+       "name": "weight",
+       "scope": "record",
+       "ftype": "float",
+       "widget": "number",
+       "label": "Вес",
+       "required": false,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {
+        "digits": [
+         6,
+         2
+        ],
+        "unit": null
+       }
+      },
+      {
+       "type": "field",
+       "id": "Карточка.f5",
+       "name": "price",
+       "scope": "record",
+       "ftype": "monetary",
+       "widget": "monetary",
+       "label": "Цена",
+       "required": false,
+       "readonly": false,
+       "visible": true,
+       "place": null,
+       "placeholder": null,
+       "options": {
+        "currency": "BYN",
+        "digits": [
+         16,
+         2
+        ],
+        "unit": null
+       }
+      }
+     ]
+    },
+    {
+     "type": "button",
+     "id": "Карточка.b1",
+     "label": "Сохранить",
+     "visible": true,
+     "icon": null,
+     "style": "default",
+     "place": null,
+     "enabled": true,
+     "action": {
+      "type": "save"
+     }
+    },
+    {
+     "type": "button",
+     "id": "Карточка.b2",
+     "label": "Удалить",
+     "visible": true,
+     "icon": null,
+     "style": "destructive",
+     "place": null,
+     "enabled": true,
+     "action": {
+      "type": "delete",
+      "confirm": true,
+      "swipe": false,
+      "model": null,
+      "record_id": null,
+      "domain": null
+     }
+    }
+   ],
+   "title": "Карточка",
+   "title_is_code": false,
+   "dismiss": "auto",
+   "crumbs": false,
+   "state": []
+  },
+  {
+   "type": "view",
+   "name": "Полки",
+   "model": null,
+   "children": [
+    {
+     "type": "field",
+     "id": "Полки.f1",
+     "name": "shelf",
+     "scope": "view",
+     "ftype": "many2one",
+     "widget": "chips",
+     "label": "Полка",
+     "required": false,
+     "readonly": false,
+     "visible": true,
+     "place": null,
+     "placeholder": null,
+     "options": {
+      "unique": false
+     },
+     "comodel": {
+      "name": "Полка",
+      "label": "Полка",
+      "display_field": "name",
+      "color_field": "color"
+     }
+    },
+    {
+     "type": "tabs",
+     "id": "Полки.tb1",
+     "page": true,
+     "children": [
+      {
+       "type": "repeat",
+       "id": "Полки.rep1",
+       "model": "Полка",
+       "children": [
+        {
+         "type": "tab",
+         "id": "Полки.tab1",
+         "label": {
+          "fmt": [
+           {
+            "i": "name"
+           }
+          ]
+         },
+         "title": [
+          {
+           "type": "text",
+           "id": "Полки.txt1",
+           "value": {
+            "fmt": [
+             {
+              "i": "name"
+             }
+            ]
+           }
+          },
+          {
+           "type": "icon",
+           "id": "Полки.ic1",
+           "name": "book"
+          },
+          {
+           "type": "pill",
+           "id": "Полки.p1",
+           "value": {
+            "text": "count(Книга, record.shelf = item.id & !record.read)"
+           },
+           "when": "closed"
+          }
+         ],
+         "fab": {
+          "type": "button",
+          "id": "Полки.b1",
+          "label": null,
+          "visible": true,
+          "icon": "add",
+          "style": "default",
+          "place": "fab",
+          "enabled": true,
+          "action": {
+           "type": "create",
+           "model": "Книга",
+           "view": "Карточка",
+           "values": {
+            "shelf": {
+             "i": "id"
+            }
+           },
+           "draft": false,
+           "target": "page"
+          }
+         },
+         "children": [
+          {
+           "type": "list",
+           "id": "Полки.l1",
+           "model": "Книга",
+           "model_label": "Книга",
+           "label": {
+            "fmt": [
+             {
+              "i": "name"
+             }
+            ]
+           },
+           "menu": {
+            "type": "menu",
+            "id": "Полки.m1",
+            "place": null,
+            "icon": "more_horiz",
+            "children": [
+             {
+              "type": "button",
+              "id": "Полки.b2",
+              "label": "Новая книга",
+              "visible": true,
+              "icon": null,
+              "style": "default",
+              "place": null,
+              "enabled": true,
+              "action": {
+               "type": "create",
+               "model": "Книга",
+               "view": "Карточка",
+               "values": {},
+               "draft": true,
+               "target": "page"
+              }
+             },
+             {
+              "type": "button",
+              "id": "Полки.b3",
+              "label": "Удалить прочитанные",
+              "visible": true,
+              "icon": null,
+              "style": "destructive",
+              "place": null,
+              "enabled": {
+               "text": "exists(Книга, record.shelf = item.id & record.read)"
+              },
+              "action": {
+               "type": "delete",
+               "confirm": {
+                "fmt": [
+                 "Удалить прочитанное с «",
+                 {
+                  "i": "name"
+                 },
+                 "»?"
+                ]
+               },
+               "swipe": false,
+               "model": "Книга",
+               "record_id": null,
+               "domain": {
+                "text": "record.shelf = item.id & record.read"
+               }
+              }
+             }
+            ]
+           },
+           "item": "Строка",
+           "open": "Карточка",
+           "swipe_label": null,
+           "row_height": 52,
+           "empty": null,
+           "display": "auto",
+           "index": false,
+           "columns": [],
+           "own_columns": false,
+           "page_size": 60,
+           "handle_field": null,
+           "handle_hidden": false,
+           "swipe_delete": null,
+           "search": {
+            "type": "search",
+            "icon": "swap_vert",
+            "fields": [
+             "title"
+            ],
+            "placeholder": "Заглавие",
+            "filters": [
+             {
+              "type": "filter",
+              "id": "Полки.flt1",
+              "label": "Непрочитанные",
+              "default": true,
+              "domain": {
+               "text": "!record.read"
+              }
+             },
+             {
+              "type": "filter",
+              "id": "Полки.flt2",
+              "label": "Прочитанные",
+              "default": false,
+              "domain": {
+               "r": "read"
+              }
+             }
+            ],
+            "sorts": [
+             {
+              "type": "sort",
+              "id": "Полки.srt1",
+              "label": "По порядку",
+              "default": true,
+              "section": false,
+              "reorderable": false,
+              "orders": [
+               {
+                "order": {
+                 "r": "sequence"
+                },
+                "dir": "asc"
+               }
+              ]
+             },
+             {
+              "type": "sort",
+              "id": "Полки.srt2",
+              "label": "Позже куплённые",
+              "default": false,
+              "section": true,
+              "reorderable": false,
+              "orders": [
+               {
+                "order": {
+                 "r": "bought"
+                },
+                "dir": "desc"
+               }
+              ]
+             }
+            ],
+            "default_filter": 0,
+            "default_sort": 0
+           },
+           "domain": {
+            "text": "record.shelf = item.id & !record.read"
+           },
+           "order": [],
+           "column_nodes": null
+          },
+          {
+           "type": "accordion",
+           "id": "Полки.acc1",
+           "label": "Прочитанные",
+           "open": false,
+           "children": [
+            {
+             "type": "list",
+             "id": "Полки.l2",
+             "model": "Книга",
+             "model_label": "Книга",
+             "label": null,
+             "menu": null,
+             "item": "Строка",
+             "open": null,
+             "swipe_label": null,
+             "row_height": 52,
+             "empty": null,
+             "display": "auto",
+             "index": false,
+             "columns": [],
+             "own_columns": false,
+             "page_size": 60,
+             "handle_field": null,
+             "handle_hidden": false,
+             "swipe_delete": null,
+             "search": null,
+             "domain": {
+              "text": "record.shelf = item.id & record.read"
+             },
+             "order": [],
+             "column_nodes": null
+            }
+           ],
+           "visible": {
+            "text": "exists(Книга, record.shelf = item.id & record.read)"
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "type": "button",
+       "id": "Полки.b4",
+       "label": "Полка",
+       "visible": true,
+       "icon": null,
+       "style": "default",
+       "place": null,
+       "enabled": true,
+       "action": {
+        "type": "create",
+        "model": "Полка",
+        "view": null,
+        "values": {},
+        "draft": false,
+        "target": "page"
+       }
+      }
+     ]
+    }
+   ],
+   "title": "Полки",
+   "title_is_code": false,
+   "dismiss": "auto",
+   "crumbs": null,
+   "state": [
+    {
+     "name": "shelf",
+     "ftype": "many2one",
+     "label": "Полка",
+     "comodel": "Полка",
+     "ondelete": "set null"
+    }
+   ]
+  }
+ ],
+ "logic": [],
+ "seeds": []
+}
