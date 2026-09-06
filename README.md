@@ -16,8 +16,10 @@ object Note : Model("Note", label = "Заметка") {
 
 ```bash
 git clone https://github.com/vlad-anisov/oneframework.git ../oneframework
+git clone https://github.com/vlad-anisov/oneframework-examples.git ../oneframework-examples
 cd ../oneframework && npm install && cd -
-node ../oneframework/src/build/cli.mjs web examples/notes-kotlin/App.kt
+node ../oneframework/bin/oneframework.mjs build web \
+     ../oneframework-examples/notes-kotlin/App.kt
 ```
 
 Тот же файл собирается дважды и разными компиляторами: **под JVM** — чтобы
@@ -36,6 +38,13 @@ node ../oneframework/src/build/cli.mjs web examples/notes-kotlin/App.kt
 Пока не умеет: узлы вида, кроме строки, поля, списка и кнопки — четыре из
 девятнадцати; и семь родов узлов выражения из четырнадцати. Недостающее пишется
 **строкой** — `expr("length(record.title) > 3")`, — дерево из неё собирает ядро.
+
+## Проверок здесь нет
+
+Всё, что сторожит эту библиотеку, живёт в
+[ядре](https://github.com/vlad-anisov/oneframework) — `tests/js/kotlin.test.mjs`:
+ей нужен и компилятор Kotlin, и сборщик. В расколотом виде эти проверки спят,
+и запускаются они только в монорепозитории.
 
 ## Что нужно на машине сборки
 
